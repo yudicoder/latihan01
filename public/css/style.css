@@ -1,0 +1,55 @@
+.bg {
+    background-color: #286090;
+    background-image: none;
+    border-radius: 0px;
+    border: none
+}
+
+.navbar-inverse .white {
+    color: #fff;
+    text-shadow: none;
+}
+
+.navbar-inverse .navbar-nav>.active>a {
+    background-color: #2b4256;
+    background-image: none;
+}
+
+.navbar-inverse .navbar-nav>li>a.white {
+    color: #fff;
+}
+
+.black {
+    color: #2f2f2f
+}
+
+.item img {
+    width: 100%
+}
+
+.user-image {
+    width: 200px;
+    height: 200px;
+    background: url('../img/user2.jpg') center;
+    background-size: cover;
+    border-radius: 1000px;
+    position: relative;
+    margin: auto;
+}
+
+.user-data h1 {
+    text-align: center;
+}
+
+.m-20 {
+    margin-top: 20px;
+}
+
+.user-detail>tbody>tr>td,
+.user-detail>tbody>tr>th {
+    padding: 15px;
+}
+
+.left {
+    text-align: left!important;
+}
