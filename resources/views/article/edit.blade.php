@@ -3,7 +3,7 @@
     <h3>Edit Article</h3> 
     {!! Form::model($article, ['route' => ['article.update', $article->
     id], 'method' => 'put', 'class' => 'form-horizontal', 'role' => 
-    'form']) !!} 
+    'form', 'files'=>'true']) !!} 
         @include('article.form') 
     {!! Form::close() !!} 
 @stop

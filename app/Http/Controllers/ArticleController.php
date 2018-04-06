@@ -7,6 +7,9 @@ use App\Article; //utk menunjukkan lokasi Article
 // use resources\views\article\Create;
 use Session, Redirect;
 use App\Http\Requests\ArticleRequest;
+use Illuminate\Support\Facades\Input;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Auth;
 
 class ArticleController extends Controller
 {
@@ -15,10 +18,49 @@ class ArticleController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $articles = Article::all(); // bs jg ditulis App\Article
-        return view('article.index')->with('articless', $articles);
+        // $articles = Article::all(); // bs jg ditulis App\Article
+        // return view('article.index')->with('articless', $articles);
+
+        // $action = Input::get('action', 'none');
+        //     dd($request->content);
+        // if ($request->ajax()) {
+        //     $articles = Article::where('title', 'like', '%' . $request->content . '%')->orWhere('content', 'like', 
+        //     '%'. $request->content. '%')
+        //     ->orderBy('updated_at', 'desc')->paginate(5);
+        //     $view = (String) view('article.list')
+        //     ->with('articles', $articles)
+        //     ->render();
+        //     return response()->json(['view' => $view, 'status' => 'success']);
+        // } else {  ->utk ajax
+
+        $action = Input::get('action', 'none');
+        if($request->ajax()) { 
+            $articles = Article::where('title', 'like', '%'.$request->content.'%') ->where('status','show')->paginate(3); 
+            // dd ($article);
+                $view = (String) view('article.list') 
+                ->with('articless', $articles) 
+                ->render(); 
+                return response()->json(['view' => $view, 'status' => 'success']); 
+            } else {
+            if ($action == 'Search') {
+                $articles = Article::where('title', 'like', 'status', 'show','%'. $request->content. '%')->paginate(3);
+                // ->orWhere('content', 'like', '%'. 
+                // $request->content. 
+                // '%')-> orWhere('status','Show')->orderBy('updated_at', 'desc')->paginate(3); //get atau paginate(5);
+                // dd($articles);
+                return view('article.index')->with('articless', $articles)->with('action', $action)->with('status','Show');
+            } elseif ($action == 'Oldest') {
+                $articles = Article::where('title', 'like', '%'. $request->content. '%')->orWhere('content', 'like', '%'. 
+                $request->content. 
+                '%')-> orWhere('status','Show')->orderBy('updated_at', 'asc')->paginate(3); //get atau paginate(5);
+                return view('article.index')->with('articless', $articles)->with('action', $action);
+            } else {
+                $articles = Article::Where('status','show')->orderBy('updated_at', 'desc')->paginate(3); //get atau paginate(5)
+                return view('article.index')->with('articless', $articles)->with('action', $action);
+            }
+        }
     }
 
     /**
@@ -39,8 +81,29 @@ class ArticleController extends Controller
      */
     public function store(ArticleRequest $request)
     {
-        Article::create($request->all()); 
-        Session::flash("notice", "Article success created"); 
+        // Article::create($request->all()); 
+        // Session::flash("notice", "Article success created"); 
+        // return redirect()->route("article.index");
+
+        // $artikel = Article::create($request->all());
+        $article = new Article();
+
+        //upload the image //
+        $file = $request->file('path');
+        $destination_path = 'uploads/';
+        $filename = str_random(6).'_'.$file->getClientOriginalName();
+        $file->move($destination_path, $filename);
+
+        $article->title = $request->title;
+        $article->content = $request->content;
+        $article->path = $destination_path . $filename;
+        $article->save();
+
+        if ($article) {
+            Session::flash("notice", "Article successfully created");
+        } else {
+            Session::flash("errors", "Article creation failed");
+        }
         return redirect()->route("article.index");
     }
 
@@ -56,7 +119,7 @@ class ArticleController extends Controller
         // return view('article.show')->with('article', $article);
         // $article = Article::find($id); 
         $comments = Article::find($id)->comments->sortBy('Comment.created_at'); 
-        return view('article.show') ->with('article', $article) ->with('comments', $comments);
+        return view('article.show') ->with('article', $article) ->with('comments', $comments) ;
     }
 
     /**
@@ -78,11 +141,49 @@ class ArticleController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(ArticleRequest $request, $id)
+    public function update(Request $request, $id)
     {
-        Article::find($id)->update($request->all()); 
-        Session::flash("notice", "Article success updated"); 
-        return redirect()->route("article.show", $id);
+        // Article::find($id)->update($request->all()); 
+        // Session::flash("notice", "Article success updated"); 
+        // return redirect()->route("article.show", $id);
+
+        // $file = $request->file('path');
+        // $destination_path = 'uploads/';
+        // $filename = str_random(6).'_'.$file->getClientOriginalName();
+        // $file->move($destination_path, $filename);
+        
+        //Validation//
+        $validation = Validator::make($request->all(), [
+            'title'   => 'required',
+            'content'=> 'required',
+            'path'  => 'required'
+        ]);
+
+        //check if it fails//
+        if($validation->fails()){
+            return redirect()->back()->withInput()
+                ->with('errors',$validation->errors());
+        }
+
+        //process valid data & go to success page//
+        $article = Article::find($id);
+        
+        //if user choose a file, replace the old one//
+        if($request->hasFile('path')){
+            $file = $request->file('path');
+            $destination_path = 'uploads/';
+            $filename = str_random(6).'_'.$file->getClientOriginalName();
+            $file->move($destination_path,$filename);
+            $article->path=$destination_path.$filename;
+        }
+        
+        //replace old data with new data from the submitted form//
+        $article->title=$request->title;
+        $article->content=$request->content;
+        $article->save();
+
+        return redirect()->route("article.index");
+    
     }
 
     /**
@@ -94,10 +195,19 @@ class ArticleController extends Controller
     public function destroy($id)
     {
         Article::destroy($id); 
-        Session::flash("notice", "Article success deleted"); 
-        return redirect()->route("article.index");
+        Session::flash("notice", "Article successfully deleted");
+        if (Auth::user()->hasRole('manager'))
+        {
+            return redirect() -> route('status.index');
+        }
+        else         
+        {
+            return redirect() -> route('article.index');
+        } 
+        
     }
     public function comments() { 
         return $this->hasMany('App\Comment', 'article_id'); 
     }
 }
+

@@ -1,20 +1,32 @@
 @extends("shared.layout") 
 @section("content") 
     <article class="row"> 
+        <div class="thumbnail">
+            {{--  <a href="{!!route('image.show',$image->id) !!}">  --}}
+                <img id="myImg" src="{{asset($article->path)}}" class="img-responsive"/>
+            {{--  </a>  --}}
+        </div>
         <h2>{!! $article->title !!}</h2> 
         <div>{!! $article->content !!}</div>
         <i>By {!! $article->author !!}</i> 
     </article> 
     <div> 
     {!! Form::open(array('route' => array('article.destroy', $article->
-    id), 'method' => 'delete')) !!} 
+    id), 'method' => 'delete')) !!}
+        @if (Auth::user()->hasRole('manager')) 
         {!! link_to(route('article.index'), "Back", ['class' => 'btn btn-
         raised btn-info']) !!} 
         {!! link_to(route('article.edit', $article->id), 'Edit', ['class' 
-        => 'btn btn-raised btn-warning']) !!} 
+        => 'btn btn-raised btn-warning']) !!}
         {!! Form::submit('Delete', array('class' => 'btn btn-raised btn-
         danger', "onclick" => "return confirm('are you sure?')")) !!}
+        @else 
+            {!! link_to(route('article.index'), "Back", ['class' => 'btn btn-
+            raised btn-info']) !!} 
+            {!! link_to(route('article.edit', $article->id), 'Edit', ['class' 
+            => 'btn btn-raised btn-warning']) !!}    
         
+        @endif
         {!! Form::close() !!} 
     </div> 
 

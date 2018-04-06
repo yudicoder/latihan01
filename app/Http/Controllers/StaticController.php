@@ -9,7 +9,7 @@ class StaticController extends Controller
     public function hello()
     {
         $kata = "Hello saya Riku dan saya saat ini akan lulus dari kuliah, salam kenal ya. 
-        Berikut contoh dari hasil design grafik yang saya buat :).";
+        Berikut contoh dari hasil design grafik yang saya buat :). Login Untuk membaca Artikel.";
         $profil = [
             'Facebook' => 'riku@gmail.com',
             'Twitter' => 'riku@gmail.com',

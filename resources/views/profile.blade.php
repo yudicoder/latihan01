@@ -2,7 +2,16 @@
 
 @section('page_title', 'Profile')
 
+{{-- @section('foto') --}}
+	
+
 @section('content')
+<div class="row">
+	<div class="col-md-3 user-data">
+		<h1>Riku Kiranatama</h1>
+		<div class="user-image"></div>
+	</div>
+	
 	<table class="table table-striped m-20 user-detail">
 		<tbody>
 		<tr>
@@ -23,4 +32,5 @@
 			</tr>
 		</tbody>
 	</table>
+</div>
 @endsection
