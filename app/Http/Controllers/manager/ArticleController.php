@@ -15,7 +15,7 @@ class ArticleController extends Controller
     public function __construct()
     {
     $this->middleware('auth');
-    $this->middleware() ->hasRole('manager');
+    $this->middleware('role:manager');
     }
 
     public function index(Request $request)
